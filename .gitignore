@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Alembic migration files
+alembic/
+
+# Ignore node_modules directory
+node_modules/
