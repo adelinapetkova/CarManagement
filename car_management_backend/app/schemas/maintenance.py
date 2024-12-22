@@ -30,3 +30,17 @@ class MaintenanceRequestResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# Report schemas
+class YearMonth(BaseModel):
+    year: int
+    month: str
+    leapYear: bool
+    monthValue: int
+
+
+class RequestsPerMonthResponse(BaseModel):
+    yearMonth: YearMonth
+    requests: int
+

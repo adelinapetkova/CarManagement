@@ -1,9 +1,13 @@
+from calendar import isleap
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import class_mapper
 from car_management_backend.app.crud_operations import maintenance_requests as maintenance_crud
+from car_management_backend.app.crud_operations import reports as reports_generator
 from car_management_backend.app.schemas.maintenance import MaintenanceRequestCreate, MaintenanceRequestUpdate, \
-    MaintenanceRequestResponse
+    MaintenanceRequestResponse, RequestsPerMonthResponse, YearMonth
 from car_management_backend.app.models.database import SessionLocal
 
 router = APIRouter()
@@ -51,7 +55,7 @@ def list_maintenance_requests(carId: int = None, garageId: int = None, startDate
     return [sqlalchemy_to_dict(request) for request in requests]
 
 
-@router.get("/maintenance/{id}", response_model=MaintenanceRequestResponse)
+@router.get("/maintenance/{id:int}", response_model=MaintenanceRequestResponse)
 def get_maintenance_request(id: int, db: Session = Depends(get_db)):
     request = maintenance_crud.get_maintenance_request(db=db, request_id=id)
     if not request:
@@ -73,3 +77,31 @@ def delete_maintenance_request(id: int, db: Session = Depends(get_db)):
     if not deleted_request:
         raise HTTPException(status_code=404, detail="Maintenance request not found")
     return sqlalchemy_to_dict(deleted_request)
+
+
+@router.get("/maintenance/monthlyRequestsReport", response_model=list[RequestsPerMonthResponse])
+def get_monthly_requests_report(garageId: int, startMonth: str, endMonth: str, db: Session = Depends(get_db)):
+    print("here")
+    requests_per_month = reports_generator.get_requests_per_month(db=db, garage_id=garageId, start_month=startMonth,
+                                                                  end_month=endMonth)
+
+    # Transform the result into the response schema format
+    response = []
+    for year_month, count in requests_per_month.items():
+        year, month_value = map(int, year_month.split("-"))
+        month_name = datetime(year, month_value, 1).strftime("%B").upper()
+        leap_year = isleap(year)
+
+        response.append(
+            RequestsPerMonthResponse(
+                yearMonth=YearMonth(
+                    year=year,
+                    month=month_name,
+                    leapYear=leap_year,
+                    monthValue=month_value,
+                ),
+                requests=count,
+            )
+        )
+
+    return response
