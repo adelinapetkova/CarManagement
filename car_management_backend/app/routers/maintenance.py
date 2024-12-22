@@ -81,7 +81,6 @@ def delete_maintenance_request(id: int, db: Session = Depends(get_db)):
 
 @router.get("/maintenance/monthlyRequestsReport", response_model=list[RequestsPerMonthResponse])
 def get_monthly_requests_report(garageId: int, startMonth: str, endMonth: str, db: Session = Depends(get_db)):
-    print("here")
     requests_per_month = reports_generator.get_requests_per_month(db=db, garage_id=garageId, start_month=startMonth,
                                                                   end_month=endMonth)
 

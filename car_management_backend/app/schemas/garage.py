@@ -25,3 +25,13 @@ class GarageResponse(GarageBase):
 
     class Config:
         orm_mode = True
+
+
+# Report schemas
+class DailyAvailabilityResponse(BaseModel):
+    date: str
+    requests: int
+    availableCapacity: int
+
+    class Config:
+        orm_mode = True
