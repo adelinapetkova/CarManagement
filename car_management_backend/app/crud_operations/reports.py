@@ -1,3 +1,4 @@
+import calendar
 from fastapi import HTTPException
 from sqlalchemy import func
 from datetime import datetime, timedelta
@@ -10,6 +11,10 @@ def get_requests_per_month(db: Session, garage_id: int, start_month: str, end_mo
     """ Get the number of maintenance requests per month for a given garage """
     start_date = datetime.strptime(start_month, "%Y-%m").date()
     end_date = datetime.strptime(end_month, "%Y-%m").date()
+
+    # Get the last day of the month
+    last_day = calendar.monthrange(end_date.year, end_date.month)[1]
+    end_date = end_date.replace(day=last_day)
 
     # Get all months between start_date and end_date
     all_months = []
